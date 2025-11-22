@@ -12,3 +12,77 @@ We provided two ideas for the app in this proposal.
 ## App Design (Figma)
 You can view the full UI/UX design of this app on Figma:
 [App Design](https://www.figma.com/design/sHoKDqTynqJLP5thdN4s3J/Focusme-app?node-id=0-1&t=l7j3yRXpGCLyJl20-1)
+
+## Technologies
+<table border="1" cellspacing="0" cellpadding="6">
+  <tr>
+    <th>Technology</th>
+    <th>Used For</th>
+    <th>Logic / How It Works</th>
+  </tr>
+
+  <tr>
+    <td><b>Google ML Kit – Barcode Scanning</b><br>
+      (https://developers.google.com/ml-kit/vision/barcode-scanning/android)
+    </td>
+    <td>Scanning food package barcodes</td>
+    <td>User scans a barcode → ML Kit extracts the UPC/GTIN → the app uses this code to look up the food.</td>
+  </tr>
+
+  <tr>
+    <td><b>USDA FoodData Central API</b><br>
+      (https://fdc.nal.usda.gov/api-guide)
+    </td>
+    <td>Fetching nutrition data</td>
+    <td>App sends the UPC to the FDC API → receives macros, vitamins, and minerals → saves it locally.</td>
+  </tr>
+
+  <tr>
+    <td><b>Kotlin + Jetpack Compose</b></td>
+    <td>UI and main logic</td>
+    <td>Compose builds screens; Kotlin handles nutrient calculations, serving-size scaling, and state flow.</td>
+  </tr>
+
+  <tr>
+    <td><b>Room Database</b></td>
+    <td>Storing logged entries</td>
+    <td>Each item (nutrients + portion size) is saved in Room → used for daily, weekly, monthly stats.</td>
+  </tr>
+
+  <tr>
+    <td><b>DataStore (Preferences)</b></td>
+    <td>User goals + settings</td>
+    <td>Stores recommended daily goals and user inputs (age, sex, preferences).</td>
+  </tr>
+
+  <tr>
+    <td><b>Kotlin Kandy (Charts)</b><br>
+      (https://kotlin.github.io/kandy/welcome.html)
+    </td>
+    <td>Chart visualizations</td>
+    <td>Reads data from Room → creates bar charts comparing intake vs. recommended values.</td>
+  </tr>
+
+  <tr>
+    <td><b>WorkManager</b></td>
+    <td>Daily reminders</td>
+    <td>Sends reminders to log meals or check progress even when the app is closed.</td>
+  </tr>
+
+  <tr>
+    <td><b>ODPHP Nutrition Guidelines</b><br>
+      (https://odphp.health.gov/sites/default/files/2019-09/Appendix-E3-1-Table-A4.pdf)
+    </td>
+    <td>Recommended nutrient values</td>
+    <td>Provides official baseline values used to calculate % of each nutrient consumed.</td>
+  </tr>
+
+  <tr>
+    <td><b>Retrofit</b></td>
+    <td>API communication</td>
+    <td>Sends UPC requests to the USDA database and receives structured nutrition data.</td>
+  </tr>
+</table>
+
+
+
