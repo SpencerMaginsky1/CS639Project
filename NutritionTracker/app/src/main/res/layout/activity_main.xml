@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!--    TODO: Factor out camera layout into it's own .xml file-->
+    <androidx.camera.view.PreviewView
+        android:id="@+id/previewView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center" />
+
+    <View
+        android:id="@+id/barcodeBox"
+        android:layout_width="250dp"
+        android:layout_height="150dp"
+        android:background="@drawable/barcode_box_shape"
+        android:layout_gravity="center" />
+
+
+    <Button
+        android:id="@+id/scanBarcodeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/scan_barcode"
+        android:layout_gravity="center"
+        android:drawableStart="@drawable/baseline_camera_alt_24"
+        android:drawablePadding="8dp" />
+
+
+    <TextView
+        android:id="@+id/upcTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/upc_placeholder"
+        android:textColor="#FFFFFF"
+        android:textSize="24sp"
+        android:layout_gravity="top|center_horizontal"
+        android:padding="16dp" />
+
+</FrameLayout>
