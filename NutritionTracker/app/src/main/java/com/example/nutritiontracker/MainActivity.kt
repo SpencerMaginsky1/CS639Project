@@ -10,6 +10,10 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import com.example.nutritiontracker.ui.navigation.NutritionApp
+import com.example.nutritiontracker.ui.theme.NutritionTrackerTheme
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -32,6 +36,10 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            NutritionTrackerTheme {
+                NutritionApp()
         setContentView(R.layout.activity_main)
 
         cameraView = findViewById(R.id.previewView)
@@ -78,6 +86,7 @@ class MainActivity : ComponentActivity() {
             Manifest.permission.CAMERA
         ) == PackageManager.PERMISSION_GRANTED
     }
+}
 
     private fun startCamera() {
         scanBarcodeButton.visibility = Button.GONE
