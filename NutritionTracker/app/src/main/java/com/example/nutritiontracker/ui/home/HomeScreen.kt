@@ -27,15 +27,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.example.nutritiontracker.camera.CameraController
 import com.example.nutritiontracker.ui.components.HeaderSection
 import com.example.nutritiontracker.ui.theme.GrayBackground
 import com.example.nutritiontracker.ui.theme.GreenPrimary
 import com.example.nutritiontracker.ui.theme.TextPrimary
 import com.example.nutritiontracker.ui.theme.TextSecondary
 
+
+
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
+    cameraController: CameraController,
+    onScanClick: () -> Unit,
     onSettingsClick: () -> Unit = {}   // gets callback from NutritionApp
 ) {
     Column(
@@ -54,7 +59,7 @@ fun HomeScreen(
 
         TodayProgressCard()
         Spacer(Modifier.height(24.dp))
-        AddFoodSection()
+        AddFoodSection(cameraController, onScanClick)
         Spacer(Modifier.height(24.dp))
         FoodActionsRow()
         Spacer(Modifier.height(24.dp))
@@ -157,7 +162,7 @@ private fun NutrientProgressRow(
 }
 
 @Composable
-fun AddFoodSection() {
+fun AddFoodSection(cameraController: CameraController, onScanClick: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -171,7 +176,7 @@ fun AddFoodSection() {
         Spacer(modifier = Modifier.height(12.dp))
 
         Button(
-            onClick = { /* TODO: open scan screen */ },
+            onClick = { onScanClick() },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(64.dp),
