@@ -14,14 +14,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.example.nutritiontracker.camera.CameraController
 import com.example.nutritiontracker.camera.CameraScreen
+import com.example.nutritiontracker.data.RDIRequirements
 import com.example.nutritiontracker.ui.goals.GoalsScreen
 import com.example.nutritiontracker.ui.home.AddFoodSection
 import com.example.nutritiontracker.ui.home.HomeScreen
+import com.example.nutritiontracker.ui.rdi.RDIResultsScreen
 import com.example.nutritiontracker.ui.settings.SettingsScreen
 
 @Composable
 fun NutritionApp(cameraController: CameraController) {   // still passed from MainActivity
     var selectedScreen by remember { mutableStateOf<Screen>(Screen.Home) }
+    var rdiRequirements by remember { mutableStateOf<RDIRequirements?>(null) }
+    var userName by remember { mutableStateOf("") }
 
     Scaffold(
         bottomBar = {
@@ -61,7 +65,23 @@ fun NutritionApp(cameraController: CameraController) {   // still passed from Ma
                 onSettingsClick = { selectedScreen = Screen.Settings }
             )
 
-            Screen.Settings -> SettingsScreen()
+            Screen.Settings -> SettingsScreen(
+                onRDICalculate = { rdi, name ->
+                    rdiRequirements = rdi
+                    userName = name
+                    selectedScreen = Screen.RDIResults
+                }
+            )
+
+            Screen.RDIResults -> {
+                rdiRequirements?.let { rdi ->
+                    RDIResultsScreen(
+                        rdiRequirements = rdi,
+                        userName = userName,
+                        onBack = { selectedScreen = Screen.Settings }
+                    )
+                }
+            }
         }
     }
 }

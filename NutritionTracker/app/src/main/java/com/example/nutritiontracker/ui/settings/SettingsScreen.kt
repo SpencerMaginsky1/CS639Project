@@ -15,48 +15,251 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.nutritiontracker.data.SettingsData
 import com.example.nutritiontracker.ui.components.HeaderSection
 import com.example.nutritiontracker.ui.theme.GrayBackground
+import com.example.nutritiontracker.utils.RDICalculator
 
 @Composable
 fun SettingsScreen(
-    onCustomizeClick: () -> Unit = {}
+    onCustomizeClick: () -> Unit = {},
+    onRDICalculate: (com.example.nutritiontracker.data.RDIRequirements, String) -> Unit = { _, _ -> },
+    viewModel: SettingsViewModel = viewModel()
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(GrayBackground)
-    ) {
-        HeaderSection(
-            title = "Settings",
-            showSettings = false
-        )
+    val savedSettings by viewModel.settings.observeAsState(SettingsData())
+    val saveSuccess by viewModel.saveSuccess.observeAsState(false)
+    val snackbarHostState = remember { SnackbarHostState() }
 
+    var isEditMode by remember { mutableStateOf(false) }
+    var name by remember { mutableStateOf(savedSettings.name) }
+    var age by remember { mutableStateOf(savedSettings.age) }
+    var gender by remember { mutableStateOf(savedSettings.gender) }
+    var height by remember { mutableStateOf(savedSettings.height) }
+    var weight by remember { mutableStateOf(savedSettings.weight) }
+    var bodyFat by remember { mutableStateOf(savedSettings.bodyFat) }
+    var activityLevel by remember { mutableStateOf(savedSettings.activityLevel) }
+    var goalType by remember { mutableStateOf(savedSettings.goalType) }
+    var dietType by remember { mutableStateOf(savedSettings.dietType) }
+    var allergies by remember { mutableStateOf(savedSettings.allergies) }
+
+    LaunchedEffect(savedSettings) {
+        name = savedSettings.name
+        age = savedSettings.age
+        gender = savedSettings.gender
+        height = savedSettings.height
+        weight = savedSettings.weight
+        bodyFat = savedSettings.bodyFat
+        activityLevel = savedSettings.activityLevel
+        goalType = savedSettings.goalType
+        dietType = savedSettings.dietType
+        allergies = savedSettings.allergies
+
+        // Check if any settings are saved
+        if (name.isNotEmpty() || age.isNotEmpty() || gender.isNotEmpty()) {
+            isEditMode = false
+        } else {
+            isEditMode = true
+        }
+    }
+
+    LaunchedEffect(saveSuccess) {
+        if (saveSuccess) {
+            snackbarHostState.showSnackbar(
+                message = "Settings saved successfully!",
+                duration = SnackbarDuration.Short
+            )
+            viewModel.clearSaveSuccessFlag()
+            isEditMode = false
+        }
+    }
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        containerColor = GrayBackground
+    ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .background(GrayBackground)
+                .padding(paddingValues)
         ) {
-            PersonalInformationSection()
-            PhysicalDetailsSection()
-            HealthGoalsSection()
+            HeaderSection(
+                title = "Settings",
+                showSettings = false
+            )
+
+            if (isEditMode) {
+                // Edit Mode - Show editable sections
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    PersonalInformationSection(
+                        name = name,
+                        onNameChange = { name = it },
+                        age = age,
+                        onAgeChange = { age = it },
+                        gender = gender,
+                        onGenderChange = { gender = it }
+                    )
+                    PhysicalDetailsSection(
+                        height = height,
+                        onHeightChange = { height = it },
+                        weight = weight,
+                        onWeightChange = { weight = it },
+                        bodyFat = bodyFat,
+                        onBodyFatChange = { bodyFat = it },
+                        activityLevel = activityLevel,
+                        onActivityLevelChange = { activityLevel = it }
+                    )
+                    HealthGoalsSection(
+                        goalType = goalType,
+                        onGoalTypeChange = { goalType = it },
+                        dietType = dietType,
+                        onDietTypeChange = { dietType = it },
+                        allergies = allergies,
+                        onAllergiesChange = { allergies = it }
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Button(
+                        onClick = {
+                            viewModel.saveSettings(
+                                SettingsData(
+                                    name = name,
+                                    age = age,
+                                    gender = gender,
+                                    height = height,
+                                    weight = weight,
+                                    bodyFat = bodyFat,
+                                    activityLevel = activityLevel,
+                                    goalType = goalType,
+                                    dietType = dietType,
+                                    allergies = allergies
+                                )
+                            )
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(
+                            "Save Settings",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+            } else {
+                // View Mode - Show summary with customize button
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    SettingsSummaryView(
+                        name = name,
+                        age = age,
+                        gender = gender,
+                        height = height,
+                        weight = weight,
+                        bodyFat = bodyFat,
+                        activityLevel = activityLevel,
+                        goalType = goalType,
+                        dietType = dietType,
+                        allergies = allergies
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // RDI Calculator Button
+                    Button(
+                        onClick = {
+                            val ageInt = age.toIntOrNull() ?: 25
+                            val weightDouble = weight.toDoubleOrNull() ?: 70.0
+                            val heightDouble = height.toDoubleOrNull() ?: 170.0
+
+                            val rdi = RDICalculator.calculateRDI(
+                                age = ageInt,
+                                gender = gender,
+                                weight = weightDouble,
+                                height = heightDouble,
+                                activityLevel = activityLevel
+                            )
+                            onRDICalculate(rdi, name)
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF00897B)
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(
+                            "Personalized RDI Calculator",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Customize Button
+                    Button(
+                        onClick = { isEditMode = true },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(
+                            "Customize Settings",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+            }
         }
     }
 }
 
 @Composable
-fun PersonalInformationSection() {
+fun PersonalInformationSection(
+    name: String,
+    onNameChange: (String) -> Unit,
+    age: String,
+    onAgeChange: (String) -> Unit,
+    gender: String,
+    onGenderChange: (String) -> Unit
+) {
     var expanded by remember { mutableStateOf(false) }
-    var name by remember { mutableStateOf("") }
-    var age by remember { mutableStateOf("") }
-    var selectedGender by remember { mutableStateOf("") }
     var genderExpanded by remember { mutableStateOf(false) }
 
     val genderOptions = listOf("Male", "Female", "Other", "Prefer not to say")
@@ -74,7 +277,7 @@ fun PersonalInformationSection() {
         ) {
             OutlinedTextField(
                 value = name,
-                onValueChange = { name = it },
+                onValueChange = onNameChange,
                 label = { Text("Name") },
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -85,7 +288,7 @@ fun PersonalInformationSection() {
 
             OutlinedTextField(
                 value = age,
-                onValueChange = { age = it },
+                onValueChange = onAgeChange,
                 label = { Text("Age") },
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -99,7 +302,7 @@ fun PersonalInformationSection() {
                 onExpandedChange = { genderExpanded = !genderExpanded }
             ) {
                 OutlinedTextField(
-                    value = selectedGender,
+                    value = gender,
                     onValueChange = {},
                     readOnly = true,
                     label = { Text("Gender") },
@@ -122,7 +325,7 @@ fun PersonalInformationSection() {
                         DropdownMenuItem(
                             text = { Text(option) },
                             onClick = {
-                                selectedGender = option
+                                onGenderChange(option)
                                 genderExpanded = false
                             }
                         )
@@ -134,12 +337,17 @@ fun PersonalInformationSection() {
 }
 
 @Composable
-fun PhysicalDetailsSection() {
+fun PhysicalDetailsSection(
+    height: String,
+    onHeightChange: (String) -> Unit,
+    weight: String,
+    onWeightChange: (String) -> Unit,
+    bodyFat: String,
+    onBodyFatChange: (String) -> Unit,
+    activityLevel: String,
+    onActivityLevelChange: (String) -> Unit
+) {
     var expanded by remember { mutableStateOf(false) }
-    var height by remember { mutableStateOf("") }
-    var weight by remember { mutableStateOf("") }
-    var bodyFat by remember { mutableStateOf("") }
-    var selectedActivityLevel by remember { mutableStateOf("") }
     var activityLevelExpanded by remember { mutableStateOf(false) }
 
     val activityLevels = listOf(
@@ -163,7 +371,7 @@ fun PhysicalDetailsSection() {
         ) {
             OutlinedTextField(
                 value = height,
-                onValueChange = { height = it },
+                onValueChange = onHeightChange,
                 label = { Text("Height (cm)") },
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -174,7 +382,7 @@ fun PhysicalDetailsSection() {
 
             OutlinedTextField(
                 value = weight,
-                onValueChange = { weight = it },
+                onValueChange = onWeightChange,
                 label = { Text("Weight (kg)") },
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -185,7 +393,7 @@ fun PhysicalDetailsSection() {
 
             OutlinedTextField(
                 value = bodyFat,
-                onValueChange = { bodyFat = it },
+                onValueChange = onBodyFatChange,
                 label = { Text("Body Fat (%)") },
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -199,7 +407,7 @@ fun PhysicalDetailsSection() {
                 onExpandedChange = { activityLevelExpanded = !activityLevelExpanded }
             ) {
                 OutlinedTextField(
-                    value = selectedActivityLevel,
+                    value = activityLevel,
                     onValueChange = {},
                     readOnly = true,
                     label = { Text("Activity Level") },
@@ -222,7 +430,7 @@ fun PhysicalDetailsSection() {
                         DropdownMenuItem(
                             text = { Text(option, style = MaterialTheme.typography.bodyMedium) },
                             onClick = {
-                                selectedActivityLevel = option
+                                onActivityLevelChange(option)
                                 activityLevelExpanded = false
                             }
                         )
@@ -234,13 +442,17 @@ fun PhysicalDetailsSection() {
 }
 
 @Composable
-fun HealthGoalsSection() {
+fun HealthGoalsSection(
+    goalType: String,
+    onGoalTypeChange: (String) -> Unit,
+    dietType: String,
+    onDietTypeChange: (String) -> Unit,
+    allergies: String,
+    onAllergiesChange: (String) -> Unit
+) {
     var expanded by remember { mutableStateOf(false) }
-    var selectedGoalType by remember { mutableStateOf("") }
     var goalTypeExpanded by remember { mutableStateOf(false) }
-    var selectedDiet by remember { mutableStateOf("") }
     var dietExpanded by remember { mutableStateOf(false) }
-    var allergies by remember { mutableStateOf("") }
 
     val goalTypes = listOf(
         "Weight Loss",
@@ -277,7 +489,7 @@ fun HealthGoalsSection() {
                 onExpandedChange = { goalTypeExpanded = !goalTypeExpanded }
             ) {
                 OutlinedTextField(
-                    value = selectedGoalType,
+                    value = goalType,
                     onValueChange = {},
                     readOnly = true,
                     label = { Text("Goal Type") },
@@ -300,7 +512,7 @@ fun HealthGoalsSection() {
                         DropdownMenuItem(
                             text = { Text(option) },
                             onClick = {
-                                selectedGoalType = option
+                                onGoalTypeChange(option)
                                 goalTypeExpanded = false
                             }
                         )
@@ -313,7 +525,7 @@ fun HealthGoalsSection() {
                 onExpandedChange = { dietExpanded = !dietExpanded }
             ) {
                 OutlinedTextField(
-                    value = selectedDiet,
+                    value = dietType,
                     onValueChange = {},
                     readOnly = true,
                     label = { Text("Diet Type") },
@@ -336,7 +548,7 @@ fun HealthGoalsSection() {
                         DropdownMenuItem(
                             text = { Text(option) },
                             onClick = {
-                                selectedDiet = option
+                                onDietTypeChange(option)
                                 dietExpanded = false
                             }
                         )
@@ -346,7 +558,7 @@ fun HealthGoalsSection() {
 
             OutlinedTextField(
                 value = allergies,
-                onValueChange = { allergies = it },
+                onValueChange = onAllergiesChange,
                 label = { Text("Allergies (comma separated)") },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 2,
@@ -404,4 +616,102 @@ fun ExpandableSection(
             }
         }
     }
+}
+
+@Composable
+fun SettingsSummaryView(
+    name: String,
+    age: String,
+    gender: String,
+    height: String,
+    weight: String,
+    bodyFat: String,
+    activityLevel: String,
+    goalType: String,
+    dietType: String,
+    allergies: String
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        // Personal Information Summary
+        SummaryCard(title = "Personal Information") {
+            if (name.isNotEmpty()) SummaryItem(label = "Name", value = name)
+            if (age.isNotEmpty()) SummaryItem(label = "Age", value = age)
+            if (gender.isNotEmpty()) SummaryItem(label = "Gender", value = gender)
+        }
+
+        // Physical Details Summary
+        SummaryCard(title = "Physical Details") {
+            if (height.isNotEmpty()) SummaryItem(label = "Height", value = "$height cm")
+            if (weight.isNotEmpty()) SummaryItem(label = "Weight", value = "$weight kg")
+            if (bodyFat.isNotEmpty()) SummaryItem(label = "Body Fat", value = "$bodyFat%")
+            if (activityLevel.isNotEmpty()) SummaryItem(label = "Activity Level", value = activityLevel)
+        }
+
+        // Health Goals Summary
+        SummaryCard(title = "Health Goals") {
+            if (goalType.isNotEmpty()) SummaryItem(label = "Goal Type", value = goalType)
+            if (dietType.isNotEmpty()) SummaryItem(label = "Diet Type", value = dietType)
+            if (allergies.isNotEmpty()) SummaryItem(label = "Allergies", value = allergies)
+        }
+    }
+}
+
+@Composable
+fun SummaryCard(
+    title: String,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp)
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF1E293B),
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+            content()
+        }
+    }
+}
+
+@Composable
+fun SummaryItem(label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            color = Color(0xFF64748B),
+            fontWeight = FontWeight.Medium
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyLarge,
+            color = Color(0xFF1E293B),
+            fontWeight = FontWeight.SemiBold
+        )
+    }
+    HorizontalDivider(
+        modifier = Modifier.padding(vertical = 4.dp),
+        thickness = 1.dp,
+        color = Color(0xFFE2E8F0)
+    )
 }
