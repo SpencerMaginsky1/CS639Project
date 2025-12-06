@@ -33,15 +33,15 @@ fun HeaderSection(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(190.dp)
+            .height(130.dp)            // ⬅️ REDUCED from 190.dp to 130.dp
             .background(GreenPrimary)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .statusBarsPadding()
-                .padding(top = 32.dp)
-                .padding(horizontal = 24.dp),
+                .padding(top = 16.dp)   // ⬅️ Reduced padding
+                .padding(horizontal = 20.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -52,7 +52,7 @@ fun HeaderSection(
                     color = Color.White
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(2.dp))  // ⬅️ smaller spacing
 
                 Text(
                     text = todayText,

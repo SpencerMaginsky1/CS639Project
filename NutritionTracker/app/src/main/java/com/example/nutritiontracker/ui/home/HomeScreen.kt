@@ -55,7 +55,7 @@ fun HomeScreen(
             onSettingsClick = onSettingsClick   // forwards to gear icon
         )
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(8.dp))
 
         TodayProgressCard()
         Spacer(Modifier.height(24.dp))
