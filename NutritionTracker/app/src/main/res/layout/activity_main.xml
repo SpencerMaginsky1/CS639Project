@@ -4,23 +4,4 @@
     android:layout_height="match_parent">
 
 
-    <!--TODO: Remove and switch to use Camerax with Jetpack Compose, via CameraScreen.kt -->
-    <View
-        android:id="@+id/barcodeBox"
-        android:layout_width="250dp"
-        android:layout_height="150dp"
-        android:background="@drawable/barcode_box_shape"
-        android:layout_gravity="center" />
-
-
-    <TextView
-        android:id="@+id/upcTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/upc_placeholder"
-        android:textColor="#FFFFFF"
-        android:textSize="24sp"
-        android:layout_gravity="top|center_horizontal"
-        android:padding="16dp" />
-
 </FrameLayout>

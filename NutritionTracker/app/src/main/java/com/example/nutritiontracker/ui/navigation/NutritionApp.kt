@@ -1,6 +1,7 @@
 // ui/navigation/NutritionApp.kt
 package com.example.nutritiontracker.ui.navigation
 
+import android.util.Log
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -26,6 +27,16 @@ fun NutritionApp(cameraController: CameraController) {   // still passed from Ma
     var selectedScreen by remember { mutableStateOf<Screen>(Screen.Home) }
     var rdiRequirements by remember { mutableStateOf<RDIRequirements?>(null) }
     var userName by remember { mutableStateOf("") }
+    var scannedBarcode by remember { mutableStateOf<String?>(null) }
+
+    cameraController.setOnBarcodeScannedListener { barcode ->
+        scannedBarcode = barcode
+        selectedScreen = Screen.Home
+
+        Log.i("MLKit", "Barcode received in callback: $scannedBarcode")
+
+        //TODO: Call the FoodData Center API here using scannedBarcode
+    }
 
     Scaffold(
         bottomBar = {
