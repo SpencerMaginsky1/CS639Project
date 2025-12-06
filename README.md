@@ -1,4 +1,4 @@
-# CS639Project
+# Nutrition Tracker
 
 ## Team
 - [Anel Bazarbayeva](https://github.com/anelbazarbayeva95/CS639)
