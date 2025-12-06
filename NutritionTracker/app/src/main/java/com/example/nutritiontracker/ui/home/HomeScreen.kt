@@ -1,8 +1,10 @@
 // ui/home/HomeScreen.kt
 package com.example.nutritiontracker.ui.home
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,6 +14,7 @@ import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Tag
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -21,11 +24,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.nutritiontracker.camera.CameraController
 import com.example.nutritiontracker.ui.components.HeaderSection
@@ -33,6 +43,7 @@ import com.example.nutritiontracker.ui.theme.GrayBackground
 import com.example.nutritiontracker.ui.theme.GreenPrimary
 import com.example.nutritiontracker.ui.theme.TextPrimary
 import com.example.nutritiontracker.ui.theme.TextSecondary
+import com.example.nutritiontracker.R
 
 
 
@@ -210,6 +221,10 @@ fun AddFoodSection(cameraController: CameraController, onScanClick: () -> Unit) 
 
 @Composable
 fun FoodActionsRow() {
+    var showEnterCodeDialog by remember { mutableStateOf(false) }
+    var showManualEntryDialog by remember { mutableStateOf(false) }
+    var codeInput by remember { mutableStateOf("") }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -220,13 +235,65 @@ fun FoodActionsRow() {
             title = "Enter Code",
             subtitle = "UPC/GTIN",
             icon = Icons.Filled.Tag,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .weight(1f)
+                .clickable{showEnterCodeDialog = true}
         )
         FoodActionCard(
             title = "Manual Entry",
             subtitle = "Enter facts",
             icon = Icons.Filled.Description,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .weight(1f)
+                .clickable{showManualEntryDialog = true}
+        )
+    }
+    // TODO: Create another AlertDialog for showManualEntryDialog
+    if(showEnterCodeDialog){
+        AlertDialog(
+            onDismissRequest = { showEnterCodeDialog = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        //TODO: Connect this to the FDC API callback
+                        showEnterCodeDialog = false
+                    },
+                ){
+                    Text("Submit")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showEnterCodeDialog = false
+                    },
+                ){
+                    Text("Cancel")
+                }
+            },
+            title = {
+                Text("Enter UPC/GTIN")
+                    },
+            text = {
+                Column {
+                    Image(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(150.dp),
+                        painter = painterResource(R.drawable.barcode_gtin_example),
+                        contentDescription = "Barcode GTIN number example",
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Enter the Barcode number below:")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    TextField(
+                        value = codeInput,
+                        onValueChange = {codeInput = it},
+                        placeholder = {"123456789123"}
+                    )
+                }
+            },
+
         )
     }
 }
