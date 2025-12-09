@@ -15,9 +15,6 @@ class SettingsRepository(context: Context) {
         private const val KEY_WEIGHT = "weight"
         private const val KEY_BODY_FAT = "body_fat"
         private const val KEY_ACTIVITY_LEVEL = "activity_level"
-        private const val KEY_GOAL_TYPE = "goal_type"
-        private const val KEY_DIET_TYPE = "diet_type"
-        private const val KEY_ALLERGIES = "allergies"
     }
 
     fun saveSettings(settings: SettingsData) {
@@ -29,9 +26,6 @@ class SettingsRepository(context: Context) {
             putString(KEY_WEIGHT, settings.weight)
             putString(KEY_BODY_FAT, settings.bodyFat)
             putString(KEY_ACTIVITY_LEVEL, settings.activityLevel)
-            putString(KEY_GOAL_TYPE, settings.goalType)
-            putString(KEY_DIET_TYPE, settings.dietType)
-            putString(KEY_ALLERGIES, settings.allergies)
             apply()
         }
     }
@@ -44,10 +38,7 @@ class SettingsRepository(context: Context) {
             height = sharedPreferences.getString(KEY_HEIGHT, "") ?: "",
             weight = sharedPreferences.getString(KEY_WEIGHT, "") ?: "",
             bodyFat = sharedPreferences.getString(KEY_BODY_FAT, "") ?: "",
-            activityLevel = sharedPreferences.getString(KEY_ACTIVITY_LEVEL, "") ?: "",
-            goalType = sharedPreferences.getString(KEY_GOAL_TYPE, "") ?: "",
-            dietType = sharedPreferences.getString(KEY_DIET_TYPE, "") ?: "",
-            allergies = sharedPreferences.getString(KEY_ALLERGIES, "") ?: ""
+            activityLevel = sharedPreferences.getString(KEY_ACTIVITY_LEVEL, "") ?: ""
         )
     }
 

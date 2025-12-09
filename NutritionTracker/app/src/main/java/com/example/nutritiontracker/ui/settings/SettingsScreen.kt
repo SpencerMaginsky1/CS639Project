@@ -46,9 +46,6 @@ fun SettingsScreen(
     var weight by remember { mutableStateOf(savedSettings.weight) }
     var bodyFat by remember { mutableStateOf(savedSettings.bodyFat) }
     var activityLevel by remember { mutableStateOf(savedSettings.activityLevel) }
-    var goalType by remember { mutableStateOf(savedSettings.goalType) }
-    var dietType by remember { mutableStateOf(savedSettings.dietType) }
-    var allergies by remember { mutableStateOf(savedSettings.allergies) }
 
     LaunchedEffect(savedSettings) {
         name = savedSettings.name
@@ -58,9 +55,6 @@ fun SettingsScreen(
         weight = savedSettings.weight
         bodyFat = savedSettings.bodyFat
         activityLevel = savedSettings.activityLevel
-        goalType = savedSettings.goalType
-        dietType = savedSettings.dietType
-        allergies = savedSettings.allergies
 
         // Check if any settings are saved
         if (name.isNotEmpty() || age.isNotEmpty() || gender.isNotEmpty()) {
@@ -123,14 +117,6 @@ fun SettingsScreen(
                         activityLevel = activityLevel,
                         onActivityLevelChange = { activityLevel = it }
                     )
-                    HealthGoalsSection(
-                        goalType = goalType,
-                        onGoalTypeChange = { goalType = it },
-                        dietType = dietType,
-                        onDietTypeChange = { dietType = it },
-                        allergies = allergies,
-                        onAllergiesChange = { allergies = it }
-                    )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
@@ -144,10 +130,7 @@ fun SettingsScreen(
                                     height = height,
                                     weight = weight,
                                     bodyFat = bodyFat,
-                                    activityLevel = activityLevel,
-                                    goalType = goalType,
-                                    dietType = dietType,
-                                    allergies = allergies
+                                    activityLevel = activityLevel
                                 )
                             )
                         },
@@ -184,10 +167,7 @@ fun SettingsScreen(
                         height = height,
                         weight = weight,
                         bodyFat = bodyFat,
-                        activityLevel = activityLevel,
-                        goalType = goalType,
-                        dietType = dietType,
-                        allergies = allergies
+                        activityLevel = activityLevel
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -262,7 +242,7 @@ fun PersonalInformationSection(
     var expanded by remember { mutableStateOf(false) }
     var genderExpanded by remember { mutableStateOf(false) }
 
-    val genderOptions = listOf("Male", "Female", "Other", "Prefer not to say")
+    val genderOptions = listOf("Male", "Female")
 
     ExpandableSection(
         title = "Personal Information",
@@ -442,136 +422,6 @@ fun PhysicalDetailsSection(
 }
 
 @Composable
-fun HealthGoalsSection(
-    goalType: String,
-    onGoalTypeChange: (String) -> Unit,
-    dietType: String,
-    onDietTypeChange: (String) -> Unit,
-    allergies: String,
-    onAllergiesChange: (String) -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-    var goalTypeExpanded by remember { mutableStateOf(false) }
-    var dietExpanded by remember { mutableStateOf(false) }
-
-    val goalTypes = listOf(
-        "Weight Loss",
-        "Weight Gain",
-        "Muscle Building",
-        "Maintain Weight",
-        "General Health"
-    )
-
-    val dietTypes = listOf(
-        "No Restrictions",
-        "Vegetarian",
-        "Vegan",
-        "Keto",
-        "Paleo",
-        "Mediterranean",
-        "Low Carb",
-        "Gluten Free"
-    )
-
-    ExpandableSection(
-        title = "Health Goals",
-        expanded = expanded,
-        onExpandToggle = { expanded = !expanded }
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            ExposedDropdownMenuBox(
-                expanded = goalTypeExpanded,
-                onExpandedChange = { goalTypeExpanded = !goalTypeExpanded }
-            ) {
-                OutlinedTextField(
-                    value = goalType,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Goal Type") },
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = goalTypeExpanded)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor(MenuAnchorType.PrimaryNotEditable),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = Color(0xFFCBD5E1)
-                    )
-                )
-                ExposedDropdownMenu(
-                    expanded = goalTypeExpanded,
-                    onDismissRequest = { goalTypeExpanded = false }
-                ) {
-                    goalTypes.forEach { option ->
-                        DropdownMenuItem(
-                            text = { Text(option) },
-                            onClick = {
-                                onGoalTypeChange(option)
-                                goalTypeExpanded = false
-                            }
-                        )
-                    }
-                }
-            }
-
-            ExposedDropdownMenuBox(
-                expanded = dietExpanded,
-                onExpandedChange = { dietExpanded = !dietExpanded }
-            ) {
-                OutlinedTextField(
-                    value = dietType,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Diet Type") },
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = dietExpanded)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor(MenuAnchorType.PrimaryNotEditable),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = Color(0xFFCBD5E1)
-                    )
-                )
-                ExposedDropdownMenu(
-                    expanded = dietExpanded,
-                    onDismissRequest = { dietExpanded = false }
-                ) {
-                    dietTypes.forEach { option ->
-                        DropdownMenuItem(
-                            text = { Text(option) },
-                            onClick = {
-                                onDietTypeChange(option)
-                                dietExpanded = false
-                            }
-                        )
-                    }
-                }
-            }
-
-            OutlinedTextField(
-                value = allergies,
-                onValueChange = onAllergiesChange,
-                label = { Text("Allergies (comma separated)") },
-                modifier = Modifier.fillMaxWidth(),
-                minLines = 2,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = Color(0xFFCBD5E1)
-                )
-            )
-        }
-    }
-}
-
-@Composable
 fun ExpandableSection(
     title: String,
     expanded: Boolean,
@@ -626,10 +476,7 @@ fun SettingsSummaryView(
     height: String,
     weight: String,
     bodyFat: String,
-    activityLevel: String,
-    goalType: String,
-    dietType: String,
-    allergies: String
+    activityLevel: String
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -648,13 +495,6 @@ fun SettingsSummaryView(
             if (weight.isNotEmpty()) SummaryItem(label = "Weight", value = "$weight kg")
             if (bodyFat.isNotEmpty()) SummaryItem(label = "Body Fat", value = "$bodyFat%")
             if (activityLevel.isNotEmpty()) SummaryItem(label = "Activity Level", value = activityLevel)
-        }
-
-        // Health Goals Summary
-        SummaryCard(title = "Health Goals") {
-            if (goalType.isNotEmpty()) SummaryItem(label = "Goal Type", value = goalType)
-            if (dietType.isNotEmpty()) SummaryItem(label = "Diet Type", value = dietType)
-            if (allergies.isNotEmpty()) SummaryItem(label = "Allergies", value = allergies)
         }
     }
 }

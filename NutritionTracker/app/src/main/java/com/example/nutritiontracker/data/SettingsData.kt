@@ -7,8 +7,5 @@ data class SettingsData(
     val height: String = "",
     val weight: String = "",
     val bodyFat: String = "",
-    val activityLevel: String = "",
-    val goalType: String = "",
-    val dietType: String = "",
-    val allergies: String = ""
+    val activityLevel: String = ""
 )
