@@ -2,6 +2,8 @@ package com.example.nutritiontracker.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.example.nutritiontracker.data.RDIRequirements
+import com.example.nutritiontracker.utils.RDICalculator
 
 class SettingsRepository(context: Context) {
     private val sharedPreferences: SharedPreferences =
@@ -39,6 +41,24 @@ class SettingsRepository(context: Context) {
             weight = sharedPreferences.getString(KEY_WEIGHT, "") ?: "",
             bodyFat = sharedPreferences.getString(KEY_BODY_FAT, "") ?: "",
             activityLevel = sharedPreferences.getString(KEY_ACTIVITY_LEVEL, "") ?: ""
+        )
+    }
+
+    fun getCurrentRdiRequirements(): RDIRequirements {
+        val settings = loadSettings()
+
+        val ageInt = settings.age.toIntOrNull() ?: 25
+        val weightDouble = settings.weight.toDoubleOrNull() ?: 70.0
+        val heightDouble = settings.height.toDoubleOrNull() ?: 170.0
+        val gender = settings.gender
+        val activityLevel = settings.activityLevel
+
+        return RDICalculator.calculateRDI(
+            age = ageInt,
+            gender = gender,
+            weight = weightDouble,
+            height = heightDouble,
+            activityLevel = activityLevel
         )
     }
 
