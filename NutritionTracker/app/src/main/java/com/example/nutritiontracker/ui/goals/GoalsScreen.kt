@@ -1,6 +1,7 @@
 // ui/goals/GoalsScreen.kt
 package com.example.nutritiontracker.ui.goals
 
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -38,6 +39,8 @@ import com.example.nutritiontracker.ui.theme.GreenPrimary
 import com.example.nutritiontracker.ui.theme.TextPrimary
 import com.example.nutritiontracker.ui.theme.TextSecondary
 
+private val DividerColor = Color(0xFFE0E3EE)
+
 /* TABS MODEL */
 
 private enum class GoalsTab(val label: String) {
@@ -51,8 +54,10 @@ private enum class GoalsTab(val label: String) {
 @Composable
 fun GoalsScreen(
     modifier: Modifier = Modifier,
-    onSettingsClick: () -> Unit = {}
+    onSettingsClick: () -> Unit = {},
+    viewModel: GoalsViewModel = viewModel()
 ) {
+    val uiState by viewModel.uiState
     var selectedTab by remember { mutableStateOf(GoalsTab.Daily) }
 
     Column(
@@ -66,34 +71,42 @@ fun GoalsScreen(
             onSettingsClick = onSettingsClick
         )
 
-        Spacer(Modifier.height(16.dp))
-
-        // Pill navigation directly under header (always visible)
-        GoalsTabSwitcher(
-            selectedTab = selectedTab,
-            onTabSelected = { selectedTab = it }
-        )
-
-        Spacer(Modifier.height(16.dp))
-
-        // Scrollable content below the pill nav.
+        // White content area with rounded top corners
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(bottom = 96.dp)
+                .background(
+                    color = Color.White,
+                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+                )
+                .padding(top = 16.dp)
         ) {
-            when (selectedTab) {
-                GoalsTab.Daily   -> DailyGoalsContent()
-                GoalsTab.Weekly  -> WeeklyGoalsContent()
-                GoalsTab.Monthly -> MonthlyGoalsContent()
+            GoalsTabSwitcher(
+                selectedTab = selectedTab,
+                onTabSelected = { selectedTab = it }
+            )
+
+            Spacer(Modifier.height(16.dp))
+
+            // Scrollable content below the pill nav.
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(bottom = 96.dp)
+            ) {
+                when (selectedTab) {
+                    GoalsTab.Daily -> DailyGoalsContent(daily = uiState.daily)
+                    GoalsTab.Weekly -> WeeklyGoalsContent(weekly = uiState.weekly)
+                    GoalsTab.Monthly -> MonthlyGoalsContent(monthly = uiState.monthly)
+                }
+
+                Spacer(Modifier.height(24.dp))
+
+                GoalsProgressSummary(selectedTab)
+
+                Spacer(Modifier.height(32.dp))
             }
-
-            Spacer(Modifier.height(24.dp))
-
-            GoalsProgressSummary(selectedTab)
-
-            Spacer(Modifier.height(32.dp))
         }
     }
 }
@@ -209,13 +222,8 @@ private fun CircularRing(
 /* DAILY GOALS */
 
 @Composable
-private fun DailyGoalsContent() {
-    // TODO: Replace all placeholder goal + intake values with real user data:
-    //  - Pull today's intake from DB / API (logged meals + nutrients)
-    //  - Pull RDI / target values from the RDI data layer
-    //  - Compute progress = current / target for each ring + RDI bar
-
-    // Main goals card (all values are placeholder data)
+fun DailyGoalsContent(daily: DailyGoalsUi) {
+    // Main goals card – now fully driven by real data
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -237,127 +245,57 @@ private fun DailyGoalsContent() {
 
             Spacer(Modifier.height(16.dp))
 
-            // Top three big rings
+            // Calories ring
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.Center
             ) {
                 BigRingStat(
-                    value = "1850",
+                    value = daily.caloriesCurrent.toString(),
                     unit = "kcal",
                     label = "Calories",
-                    subtitle = "1850 / 2500 kcal",
-                    progress = 1850f / 2500f
-                )
-                BigRingStat(
-                    value = "3",
-                    unit = "",
-                    label = "Fruits",
-                    subtitle = "3 / 4\nservings",
-                    progress = 3f / 4f
-                )
-                BigRingStat(
-                    value = "4",
-                    unit = "",
-                    label = "Veggies",
-                    subtitle = "4 / 5\nservings",
-                    progress = 4f / 5f
+                    subtitle = "${daily.caloriesCurrent} / ${daily.caloriesTarget} kcal",
+                    progress = daily.progressToCalorieGoal.coerceIn(0f, 1f)
                 )
             }
 
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(16.dp))
 
-            Text(
-                text = "Macronutrients",
-                style = MaterialTheme.typography.bodyMedium,
-                color = TextPrimary
-            )
-
-            Spacer(Modifier.height(12.dp))
-
+            // NOTE: Protein / Carbs / Fat are still placeholders until
+            // you wire macro totals into GoalsViewModel / DailyLogEntity.
+            // For now you can either keep them as TODO or hide this block.
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 SmallRingStat(
                     label = "Protein",
-                    value = "78/120",
+                    value = "0/0",
                     unit = "g",
                     ringColor = Color(0xFF5C9DFF),
-                    progress = 78f / 120f
+                    progress = 0f
                 )
                 SmallRingStat(
                     label = "Carbs",
-                    value = "195/280",
+                    value = "0/0",
                     unit = "g",
                     ringColor = Color(0xFFFFB74D),
-                    progress = 195f / 280f
+                    progress = 0f
                 )
                 SmallRingStat(
                     label = "Fat",
-                    value = "52/70",
+                    value = "0/0",
                     unit = "g",
                     ringColor = Color(0xFFBA68C8),
-                    progress = 52f / 70f
+                    progress = 0f
                 )
             }
 
-            Spacer(Modifier.height(20.dp))
-            Divider(color = Color(0xFFE5E7F0))
             Spacer(Modifier.height(16.dp))
 
-            Text(
-                text = "Today's Intake vs RDI",
-                style = MaterialTheme.typography.bodyMedium,
-                color = TextPrimary
-            )
+            Divider(color = DividerColor)
 
-            Spacer(Modifier.height(16.dp))
-
-            RdiProgressRow("Fiber",     "18/30",       18f / 30f,      GreenPrimary)
-            Spacer(Modifier.height(10.dp))
-            RdiProgressRow("Vitamin C", "65/90",       65f / 90f,      Color(0xFFFFA726))
-            Spacer(Modifier.height(10.dp))
-            RdiProgressRow("Vitamin D", "12/20",       12f / 20f,      Color(0xFFAB47BC))
-            Spacer(Modifier.height(10.dp))
-            RdiProgressRow("Calcium",   "750/1000 mg", 750f / 1000f,   Color(0xFF42A5F5))
-            Spacer(Modifier.height(10.dp))
-            RdiProgressRow("Iron",      "11/18 mg",    11f / 18f,      Color(0xFFE53935))
-        }
-    }
-
-    Spacer(Modifier.height(16.dp))
-
-    // “Great Progress!” card – 74% is a placeholder for now.
-    // TODO: Replace 74% with a real value from your data layer (e.g., ViewModel).
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(Color(0xFFF1FAF5)),
-        elevation = CardDefaults.cardElevation(0.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .background(Color.White, CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowUpward,
-                    contentDescription = null,
-                    tint = GreenPrimary
-                )
-            }
-
-            Spacer(Modifier.width(16.dp))
+            Spacer(Modifier.height(12.dp))
 
             Column {
                 Text(
@@ -366,7 +304,7 @@ private fun DailyGoalsContent() {
                     color = TextPrimary
                 )
                 Text(
-                    text = "You're 74% to your calorie goal", // placeholder
+                    text = "You're ${(daily.progressToCalorieGoal * 100).toInt()}% to your calorie goal",
                     style = MaterialTheme.typography.bodySmall,
                     color = TextSecondary
                 )
@@ -496,10 +434,8 @@ private fun RdiProgressRow(
 }
 
 /*  WEEKLY GOALS  */
-
 @Composable
-private fun WeeklyGoalsContent() {
-    // Main weekly card
+fun WeeklyGoalsContent(weekly: WeeklyGoalsUi) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -525,7 +461,7 @@ private fun WeeklyGoalsContent() {
                         style = MaterialTheme.typography.titleMedium,
                         color = TextPrimary
                     )
-                    Spacer(Modifier.height(4.dp))
+                    Spacer(Modifier.height(2.dp))
                     Text(
                         text = "Total nutrient intake vs daily goals",
                         style = MaterialTheme.typography.bodySmall,
@@ -537,18 +473,92 @@ private fun WeeklyGoalsContent() {
 
             Spacer(Modifier.height(16.dp))
 
-            WeeklyPerformanceChart()
+            if (weekly.days.isEmpty()) {
+                Text(
+                    text = "No data yet. Log today’s intake to see weekly performance.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextSecondary
+                )
+            } else {
+                WeeklyPerformanceChart(days = weekly.days)
+            }
 
             Spacer(Modifier.height(16.dp))
 
-            // Legend – slightly bigger dots & spacing
-            LegendDotRow(color = Color(0xFF22A865), label = "Goal Met (100%+)")
-            Spacer(Modifier.height(6.dp))
-            LegendDotRow(color = Color(0xFFFF9800), label = "Close (80–99%)")
-            Spacer(Modifier.height(6.dp))
-            LegendDotRow(color = Color(0xFFE53935), label = "Below Target (<80%)")
+            WeeklyLegend()
+        }
+    }
+}
+@Composable
+private fun WeeklyPerformanceChart(days: List<WeeklyDayUi>) {
+    if (days.isEmpty()) return
 
-            Spacer(Modifier.height(16.dp))
+    val maxPercent = (days.maxOf { it.percentOfGoal }.coerceAtLeast(120f))
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp)
+    ) {
+        WeeklyYAxis()
+
+        Spacer(Modifier.width(8.dp))
+
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Bottom
+            ) {
+                days.forEach { day ->
+                    val rawPercent = day.percentOfGoal
+                    val fraction = (rawPercent / maxPercent).coerceIn(0f, 1f)
+                    val barColor = when {
+                        rawPercent < 80f  -> Color(0xFFE57373)   // red: below target
+                        rawPercent < 100f -> Color(0xFFFFB74D)   // orange: close
+                        else              -> Color(0xFF4CAF50)   // green: goal met
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Bottom
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .height(140.dp)
+                                .width(24.dp),
+                            contentAlignment = Alignment.BottomCenter
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxHeight(fraction)
+                                    .fillMaxWidth()
+                                    .background(
+                                        color = barColor,
+                                        shape = RoundedCornerShape(
+                                            topStart = 8.dp,
+                                            topEnd = 8.dp
+                                        )
+                                    )
+                            )
+                        }
+
+                        Spacer(Modifier.height(4.dp))
+
+                        Text(
+                            text = day.label,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = TextSecondary
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -581,115 +591,24 @@ private fun WeeklyRangeChip() {
 }
 
 @Composable
-private fun WeeklyPerformanceChart() {
-    // TODO: Replace placeholder weekly percentages with real values computed from:
-    //  - Aggregated daily intake (sum of nutrients per day)
-    //  - Daily goals / RDI targets
-    //  - percent = totalForDay / dailyTarget
-
-    val percentages = listOf(
-        88f,  // Mon – close
-        95f,  // Tue – close / near goal
-        75f,  // Wed – below
-        110f, // Thu – above goal (green)
-        92f,  // Fri – close
-        90f,  // Sat – close
-        70f   // Sun – below
-    )
-    val days = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
-
-    // Y-axis scale: 0 → 0%, 120 → 120%
-    val maxPercent = 120f
-    val targetPercent = 95f          // dashed goal line position
-    val maxBarHeight = 140.dp
-
-    val metGreen    = Color(0xFF22A865)
-    val closeOrange = Color(0xFFFF9800)
-    val belowRed    = Color(0xFFE53935)
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(maxBarHeight + 32.dp) // space for dashed line + labels
-            .padding(top = 4.dp)
+private fun WeeklyLegend() {
+    Column(
+        modifier = Modifier.fillMaxWidth()
     ) {
-        // LEFT: Y-axis with 0–120 labels
-        WeeklyYAxis()
-
-        Spacer(Modifier.width(8.dp))
-
-        // RIGHT: chart area (bars + dashed target line)
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight()
-        ) {
-            // dashed goal line at ~95% of scale
-            val targetFraction = (targetPercent / maxPercent).coerceIn(0f, 1f)
-
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .offset(y = -(maxBarHeight * targetFraction))
-                    .fillMaxWidth()
-            ) {
-                DashedTargetLine(
-                    modifier = Modifier.padding(horizontal = 4.dp)
-                )
-            }
-
-            Row(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Bottom
-            ) {
-                percentages.forEachIndexed { index, percent ->
-                    val fractionOfScale =
-                        (percent / maxPercent).coerceIn(0f, 1f)
-
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Bottom
-                    ) {
-                        // full-scale box + inner bar
-                        Box(
-                            modifier = Modifier
-                                .height(maxBarHeight)
-                                .width(26.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .height(maxBarHeight * fractionOfScale)
-                                    .fillMaxWidth()
-                                    .background(
-                                        color = when {
-                                            percent >= 100f -> metGreen
-                                            percent >= 80f  -> closeOrange
-                                            else            -> belowRed
-                                        },
-                                        shape = RoundedCornerShape(
-                                            topStart = 8.dp,
-                                            topEnd = 8.dp
-                                        )
-                                    )
-                            )
-                        }
-
-                        Spacer(Modifier.height(8.dp))
-
-                        Text(
-                            text = days[index],
-                            style = MaterialTheme.typography.bodySmall,
-                            color = TextSecondary
-                        )
-                    }
-                }
-            }
-        }
+        LegendDotRow(
+            color = Color(0xFF4CAF50),
+            label = "Goal Met (100%+)"
+        )
+        Spacer(Modifier.height(4.dp))
+        LegendDotRow(
+            color = Color(0xFFFFB74D),
+            label = "Close (80–99%)"
+        )
+        Spacer(Modifier.height(4.dp))
+        LegendDotRow(
+            color = Color(0xFFE57373),
+            label = "Below Target (<80%)"
+        )
     }
 }
 
@@ -768,19 +687,8 @@ private fun LegendDotRow(color: Color, label: String) {
 }
 
 /*  MONTHLY GOALS  */
-
 @Composable
-private fun MonthlyGoalsContent() {
-    // TODO:
-    //  - Replace ALL placeholder monthly values with real data:
-    //      * totalDaysTrackedThisMonth (e.g., 22/28)
-    //      * successRate = daysMetGoal / totalDays (e.g., 79%)
-    //      * daysPerWeek list (Week 1–4) computed from the user's logs
-    //  - Pull this from the same data layer as Daily/Weekly:
-    //      * user input (logged goals met / not met)
-    //      * RDI / target configuration
-    //      * any API-backed nutrition data if needed
-
+fun MonthlyGoalsContent(monthly: MonthlyGoalsUi) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -794,8 +702,7 @@ private fun MonthlyGoalsContent() {
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
-
-            /* HEADER */
+            // Title + chip
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -807,7 +714,7 @@ private fun MonthlyGoalsContent() {
                         style = MaterialTheme.typography.titleMedium,
                         color = TextPrimary
                     )
-                    Spacer(Modifier.height(4.dp))
+                    Spacer(Modifier.height(2.dp))
                     Text(
                         text = "Days per week you met your daily goal",
                         style = MaterialTheme.typography.bodySmall,
@@ -819,49 +726,48 @@ private fun MonthlyGoalsContent() {
 
             Spacer(Modifier.height(12.dp))
 
-            /* SUMMARY CARD */
-            // TODO: Replace with real monthly aggregate data.
             MonthlySummaryCard(
-                totalDaysText = "22/28",
-                successRateText = "79%"
+                totalDaysText = "${monthly.daysMetGoal}/${monthly.totalDaysTracked}",
+                successRateText = "${monthly.successRatePercent}%"
             )
 
             Spacer(Modifier.height(16.dp))
 
-            /* CHART */
-            MonthlyConsistencyChart()
+            if (monthly.weeks.isEmpty()) {
+                Text(
+                    text = "No data recorded yet for this month.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextSecondary
+                )
+            } else {
+                MonthlyConsistencyChart(weeks = monthly.weeks)
+            }
 
             Spacer(Modifier.height(16.dp))
 
-            /* LEGEND */
+            // Keep your existing legend items
             MonthlyLegendItem(
                 color = Color(0xFF7C4DFF),
                 label = "Perfect (7 days)"
             )
             Spacer(Modifier.height(4.dp))
-
             MonthlyLegendItem(
                 color = Color(0xFF9575CD),
                 label = "Great (5–6 days)"
             )
             Spacer(Modifier.height(4.dp))
-
             MonthlyLegendItem(
                 color = Color(0xFFB39DDB),
                 label = "Good (3–4 days)"
             )
             Spacer(Modifier.height(4.dp))
-
             MonthlyLegendItem(
-                color = Color(0xFFD1C4E9),
+                color = Color(0xFFE0E0E0),
                 label = "Needs Work (<3 days)"
             )
-
-            Spacer(Modifier.height(8.dp))
         }
     }
 }
-
 
 /* MONTHLY SUBCOMPONENTS */
 
@@ -994,25 +900,12 @@ private fun MonthlyYAxis(maxDays: Int) {
 
 
 /* MONTHLY BAR CHART */
-
 @Composable
-private fun MonthlyConsistencyChart() {
+private fun MonthlyConsistencyChart(weeks: List<MonthlyWeekUi>) {
+    if (weeks.isEmpty()) return
 
-    // TODO:
-    //  Replace with REAL values based on user logs (days they met their daily goal).
-    val daysPerWeek = listOf(5, 6, 4, 7)
-    val weeks = listOf("Week 1", "Week 2", "Week 3", "Week 4")
-
-    val maxDays = 7f
-    val targetDays = 7f
+    val maxDays = weeks.maxOf { it.daysMetGoal }.coerceAtLeast(7)
     val maxBarHeight = 140.dp
-
-    val barColors = listOf(
-        Color(0xFF7C4DFF),  // Week 1
-        Color(0xFF9575CD),  // Week 2
-        Color(0xFFB39DDB),  // Week 3
-        Color(0xFF7E57C2)   // Week 4
-    )
 
     Row(
         modifier = Modifier
@@ -1020,7 +913,7 @@ private fun MonthlyConsistencyChart() {
             .height(maxBarHeight + 32.dp)
             .padding(top = 4.dp)
     ) {
-        MonthlyYAxis(maxDays = maxDays.toInt())
+        MonthlyYAxis(maxDays = maxDays)
 
         Spacer(Modifier.width(8.dp))
 
@@ -1029,33 +922,16 @@ private fun MonthlyConsistencyChart() {
                 .weight(1f)
                 .fillMaxHeight()
         ) {
-
-            // dashed line (7 days target)
-            val targetFraction = (targetDays / maxDays).coerceIn(0f, 1f)
-
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .offset(y = -(maxBarHeight * targetFraction))
-                    .fillMaxWidth()
-            ) {
-                DashedTargetLine(
-                    modifier = Modifier.padding(horizontal = 4.dp)
-                )
-            }
-
-            // Bars
             Row(
                 modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
+                    .fillMaxSize()
+                    .padding(horizontal = 4.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Bottom
             ) {
-
-                daysPerWeek.forEachIndexed { index, days ->
-                    val fraction = (days / maxDays).coerceIn(0f, 1f)
+                weeks.forEach { week ->
+                    val fraction = (week.daysMetGoal.toFloat() / maxDays.toFloat())
+                        .coerceIn(0f, 1f)
 
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -1064,18 +940,18 @@ private fun MonthlyConsistencyChart() {
                         Box(
                             modifier = Modifier
                                 .height(maxBarHeight)
-                                .width(30.dp)
+                                .width(30.dp),
+                            contentAlignment = Alignment.BottomCenter
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .height(maxBarHeight * fraction)
+                                    .fillMaxHeight(fraction)
                                     .fillMaxWidth()
                                     .background(
-                                        color = barColors[index],
+                                        color = Color(0xFF7C4DFF),
                                         shape = RoundedCornerShape(
-                                            topStart = 10.dp,
-                                            topEnd = 10.dp
+                                            topStart = 8.dp,
+                                            topEnd = 8.dp
                                         )
                                     )
                             )
@@ -1084,7 +960,7 @@ private fun MonthlyConsistencyChart() {
                         Spacer(Modifier.height(8.dp))
 
                         Text(
-                            text = weeks[index],
+                            text = week.label,
                             style = MaterialTheme.typography.bodySmall,
                             color = TextSecondary
                         )
