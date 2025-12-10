@@ -262,7 +262,10 @@ fun FoodActionsRow(onBarcodeEntered: (String) -> Unit, onManualEntry: (Nutrition
     }
     if(showEnterCodeDialog){
         AlertDialog(
-            onDismissRequest = { showEnterCodeDialog = false },
+            onDismissRequest = {
+                showEnterCodeDialog = false
+                codeInput = ""
+            },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -278,6 +281,7 @@ fun FoodActionsRow(onBarcodeEntered: (String) -> Unit, onManualEntry: (Nutrition
                 TextButton(
                     onClick = {
                         showEnterCodeDialog = false
+                        codeInput = ""
                     },
                 ){
                     Text("Cancel")
@@ -310,7 +314,18 @@ fun FoodActionsRow(onBarcodeEntered: (String) -> Unit, onManualEntry: (Nutrition
     }
     if(showManualEntryDialog){
         AlertDialog(
-            onDismissRequest = { showManualEntryDialog = false },
+            onDismissRequest = {
+                showManualEntryDialog = false
+                description = ""
+                calories = ""
+                protein = ""
+                totalCarbs = ""
+                totalFat = ""
+                fiber = ""
+                vitaminC = ""
+                vitaminD = ""
+                calcium = ""
+            },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -347,6 +362,15 @@ fun FoodActionsRow(onBarcodeEntered: (String) -> Unit, onManualEntry: (Nutrition
                 TextButton(
                     onClick = {
                         showManualEntryDialog = false
+                        description = ""
+                        calories = ""
+                        protein = ""
+                        totalCarbs = ""
+                        totalFat = ""
+                        fiber = ""
+                        vitaminC = ""
+                        vitaminD = ""
+                        calcium = ""
                     },
                 ){
                     Text("Cancel")
