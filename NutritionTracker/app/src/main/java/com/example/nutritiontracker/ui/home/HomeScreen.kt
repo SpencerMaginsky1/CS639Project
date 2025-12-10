@@ -52,6 +52,7 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     cameraController: CameraController,
     onScanClick: () -> Unit,
+    onBarcodeEntered: (String) -> Unit,
     onSettingsClick: () -> Unit = {}   // gets callback from NutritionApp
 ) {
     Column(
@@ -72,7 +73,7 @@ fun HomeScreen(
         Spacer(Modifier.height(24.dp))
         AddFoodSection(cameraController, onScanClick)
         Spacer(Modifier.height(24.dp))
-        FoodActionsRow()
+        FoodActionsRow(onBarcodeEntered)
         Spacer(Modifier.height(24.dp))
         TodaysLogCard()
         Spacer(Modifier.height(24.dp))
@@ -220,7 +221,7 @@ fun AddFoodSection(cameraController: CameraController, onScanClick: () -> Unit) 
 }
 
 @Composable
-fun FoodActionsRow() {
+fun FoodActionsRow(onBarcodeEntered: (String) -> Unit) {
     var showEnterCodeDialog by remember { mutableStateOf(false) }
     var showManualEntryDialog by remember { mutableStateOf(false) }
     var codeInput by remember { mutableStateOf("") }
@@ -255,7 +256,8 @@ fun FoodActionsRow() {
             confirmButton = {
                 TextButton(
                     onClick = {
-                        //TODO: Connect this to the FDC API callback
+                        onBarcodeEntered(codeInput)
+                        codeInput = ""
                         showEnterCodeDialog = false
                     },
                 ){

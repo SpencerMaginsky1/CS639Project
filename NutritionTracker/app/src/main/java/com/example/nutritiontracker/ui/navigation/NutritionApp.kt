@@ -37,27 +37,28 @@ fun NutritionApp(cameraController: CameraController) {   // still passed from Ma
     var selectedScreen by remember { mutableStateOf<Screen>(Screen.Home) }
     var rdiRequirements by remember { mutableStateOf<RDIRequirements?>(null) }
     var userName by remember { mutableStateOf("") }
-    var scannedBarcode by remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
     val fdcHelper = remember { FDCHelper() }
+    var scannedBarcode by remember { mutableStateOf<String?>(null) }
+    // This is where the Scanned food's Name and FDC ID will be stored
     var scannedFoodFound by remember { mutableStateOf<FdcIdDetails?>(null)}
+    // This is where the Scanned food's Nutritional facts will be stored
     var nutritionalFacts by remember {mutableStateOf<NutritionSummary?>(null)}
+    // Stores any Errors obtained from processing the barcode with the FDC API
     var obtainedErrors by remember { mutableStateOf<String?>(null) }
 
-    cameraController.barcodeScannedCallback { barcode ->
+    cameraController.barcodeScannedReturnHome { barcode ->
         scannedBarcode = barcode
         selectedScreen = Screen.Home
 
-        Log.i("MLKit", "Barcode received in callback: $scannedBarcode")
-
     }
 
-    DisposableEffect(LocalLifecycleOwner.current) {
-
-        val callback: (String) -> Unit = { barcode ->
+        val processBarcodeCallback: (String) -> Unit = { barcode ->
             scannedBarcode = barcode
             selectedScreen = Screen.Home
             obtainedErrors = null
+            scannedFoodFound = null
+            nutritionalFacts = null
 
             coroutineScope.launch(Dispatchers.IO) {
                 try {
@@ -90,7 +91,8 @@ fun NutritionApp(cameraController: CameraController) {   // still passed from Ma
                 }
             }
         }
-            cameraController.barcodeScannedCallback(callback)
+    DisposableEffect(LocalLifecycleOwner.current) {
+            cameraController.barcodeScannedReturnHome(processBarcodeCallback)
             onDispose {
             }
 
@@ -121,7 +123,8 @@ fun NutritionApp(cameraController: CameraController) {   // still passed from Ma
                 onSettingsClick = { selectedScreen = Screen.Settings },
                 modifier = Modifier,
                 cameraController = cameraController,
-                onScanClick = { selectedScreen = Screen.Camera }
+                onScanClick = { selectedScreen = Screen.Camera },
+                onBarcodeEntered = processBarcodeCallback
             )
 
             //TODO: Remove this call and reference to AddFood screen as this is not a screen but
