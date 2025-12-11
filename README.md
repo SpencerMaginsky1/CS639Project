@@ -2,6 +2,9 @@
 
 **Disclosure:** *This app was created for CS 639 Mobile App Development at Pace University in Fall 2025.*
 
+<img src="app/src/main/res/mipmap-xxhdpi/ic_launcher_round.webp" width="140" />
+
+
 ## Team
 - [Anel Bazarbayeva](https://github.com/anelbazarbayeva95/CS639)
 - [Spencer Maginsky](https://github.com/SpencerMaginsky1/CS639)
