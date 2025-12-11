@@ -15,7 +15,6 @@ Whether you want to eat more balanced meals, improve your energy levels, or bett
 With smart logging tools, daily summaries, and clear progress insights, you always know how your nutrition supports your goals.
 **Your nutrition, simplified.**
 
-
 ## Idea Proposal
 We provided one concept for the app in this proposal.
 [Access the full document](https://docs.google.com/document/d/1ZKc6Qso6i7H1zEfAr3XOron34Bq-oyco2D7qs0zLsSc/edit?usp=sharing)
@@ -23,6 +22,16 @@ We provided one concept for the app in this proposal.
 ## Design
 You can view the full UI/UX design of this app on Figma:
 [App Design](https://www.figma.com/design/sHoKDqTynqJLP5thdN4s3J/Focusme-app?node-id=0-1&t=l7j3yRXpGCLyJl20-1)
+
+## Main Features
+- Log meals quickly with an intuitive, clean interface  
+- Track calories, macros, and nutrients with real-time progress  
+- View daily, weekly, and monthly goal summaries  
+- Scan food items using barcode scanning (ML Kit)  
+- Access verified nutrition data with the USDA API  
+- Minimal, user-friendly UI designed for fast meal tracking  
+- Smart charts and daily dashboards for insights  
+
 
 ## Technologies
 <table border="1" cellspacing="0" cellpadding="6">
