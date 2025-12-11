@@ -55,8 +55,12 @@ private enum class GoalsTab(val label: String) {
 fun GoalsScreen(
     modifier: Modifier = Modifier,
     onSettingsClick: () -> Unit = {},
-    viewModel: GoalsViewModel = viewModel()
+    viewModel: GoalsViewModel = viewModel(),
+    foodLog: List<com.example.nutritiontracker.data.fdc.NutritionSummary> = emptyList()
 ) {
+    // Update ViewModel with current food log
+    viewModel.updateFoodLog(foodLog)
+
     val uiState by viewModel.uiState
     var selectedTab by remember { mutableStateOf(GoalsTab.Daily) }
 
@@ -261,33 +265,36 @@ fun DailyGoalsContent(daily: DailyGoalsUi) {
 
             Spacer(Modifier.height(16.dp))
 
-            // NOTE: Protein / Carbs / Fat are still placeholders until
-            // you wire macro totals into GoalsViewModel / DailyLogEntity.
-            // For now you can either keep them as TODO or hide this block.
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 SmallRingStat(
                     label = "Protein",
-                    value = "0/0",
+                    value = "${daily.proteinCurrent}/${daily.proteinTarget}",
                     unit = "g",
                     ringColor = Color(0xFF5C9DFF),
-                    progress = 0f
+                    progress = if (daily.proteinTarget > 0) {
+                        daily.proteinCurrent.toFloat() / daily.proteinTarget.toFloat()
+                    } else 0f
                 )
                 SmallRingStat(
                     label = "Carbs",
-                    value = "0/0",
+                    value = "${daily.carbsCurrent}/${daily.carbsTarget}",
                     unit = "g",
                     ringColor = Color(0xFFFFB74D),
-                    progress = 0f
+                    progress = if (daily.carbsTarget > 0) {
+                        daily.carbsCurrent.toFloat() / daily.carbsTarget.toFloat()
+                    } else 0f
                 )
                 SmallRingStat(
                     label = "Fat",
-                    value = "0/0",
+                    value = "${daily.fatCurrent}/${daily.fatTarget}",
                     unit = "g",
                     ringColor = Color(0xFFBA68C8),
-                    progress = 0f
+                    progress = if (daily.fatTarget > 0) {
+                        daily.fatCurrent.toFloat() / daily.fatTarget.toFloat()
+                    } else 0f
                 )
             }
 

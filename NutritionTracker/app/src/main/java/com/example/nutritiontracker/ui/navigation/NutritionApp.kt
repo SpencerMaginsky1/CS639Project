@@ -46,6 +46,8 @@ fun NutritionApp(cameraController: CameraController) {   // still passed from Ma
     var nutritionalFacts by remember {mutableStateOf<NutritionSummary?>(null)}
     // Stores any Errors obtained from processing the barcode with the FDC API
     var obtainedErrors by remember { mutableStateOf<String?>(null) }
+    // List of today's logged food items
+    var todaysFoodLog by remember { mutableStateOf<List<NutritionSummary>>(emptyList()) }
 
     cameraController.barcodeScannedReturnHome { barcode ->
         scannedBarcode = barcode
@@ -57,6 +59,9 @@ fun NutritionApp(cameraController: CameraController) {   // still passed from Ma
         nutritionalFacts = summary
         scannedFoodFound = null
         selectedScreen = Screen.Home
+
+        // Add to today's food log
+        todaysFoodLog = todaysFoodLog + summary
 
         Log.i("Manual Entry Success", "Food found: ${summary.description}")
         Log.i(
@@ -100,6 +105,9 @@ fun NutritionApp(cameraController: CameraController) {   // still passed from Ma
 
                 scannedFoodFound = results.details
                 nutritionalFacts = results.summary
+
+                // Add to today's food log
+                todaysFoodLog = todaysFoodLog + results.summary
             } catch (e: Exception) {
                 obtainedErrors = when (e) {
                     is NoSuchElementException -> "Food not Found"
@@ -144,7 +152,8 @@ fun NutritionApp(cameraController: CameraController) {   // still passed from Ma
                 cameraController = cameraController,
                 onScanClick = { selectedScreen = Screen.Camera },
                 onBarcodeEntered = processBarcodeCallback,
-                onManualEntry = manualEntryCallback
+                onManualEntry = manualEntryCallback,
+                foodLog = todaysFoodLog
             )
 
             //TODO: Remove this call and reference to AddFood screen as this is not a screen but
@@ -157,7 +166,8 @@ fun NutritionApp(cameraController: CameraController) {   // still passed from Ma
             Screen.Camera -> CameraScreen(cameraController)
 
             Screen.Goals -> GoalsScreen(
-                onSettingsClick = { selectedScreen = Screen.Settings }
+                onSettingsClick = { selectedScreen = Screen.Settings },
+                foodLog = todaysFoodLog
             )
 
             Screen.Settings -> SettingsScreen(

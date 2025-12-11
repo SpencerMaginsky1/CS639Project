@@ -54,7 +54,8 @@ fun HomeScreen(
     onScanClick: () -> Unit,
     onBarcodeEntered: (String) -> Unit,
     onManualEntry: (NutritionSummary) -> Unit,
-    onSettingsClick: () -> Unit = {}   // gets callback from NutritionApp
+    onSettingsClick: () -> Unit = {},   // gets callback from NutritionApp
+    foodLog: List<NutritionSummary> = emptyList()
 ) {
     Column(
         modifier = modifier
@@ -76,7 +77,7 @@ fun HomeScreen(
         Spacer(Modifier.height(24.dp))
         FoodActionsRow(onBarcodeEntered, onManualEntry)
         Spacer(Modifier.height(24.dp))
-        TodaysLogCard()
+        TodaysLogCard(foodLog)
         Spacer(Modifier.height(24.dp))
     }
 }
@@ -472,7 +473,9 @@ fun FoodActionCard(
 }
 
 @Composable
-fun TodaysLogCard() {
+fun TodaysLogCard(foodLog: List<NutritionSummary> = emptyList()) {
+    val totalCalories = foodLog.sumOf { it.calories ?: 0.0 }.toInt()
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -493,29 +496,35 @@ fun TodaysLogCard() {
                     color = TextPrimary
                 )
                 Text(
-                    text = "340 kcal",
+                    text = "$totalCalories kcal",
                     style = MaterialTheme.typography.bodyMedium,
                     color = TextSecondary
                 )
             }
 
-            Spacer(Modifier.height(8.dp))
-            Divider(color = Color(0xFFE3E5ED), thickness = 1.dp)
-            Spacer(Modifier.height(12.dp))
+            if (foodLog.isNotEmpty()) {
+                Spacer(Modifier.height(8.dp))
+                Divider(color = Color(0xFFE3E5ED), thickness = 1.dp)
+                Spacer(Modifier.height(12.dp))
 
-            LogItemRow(
-                title = "Greek Yogurt with",
-                subtitle = "1 cup",
-                kcal = "180 kcal",
-                macros = "P: 15g · C: 25g · F: 3g"
-            )
-            Spacer(Modifier.height(12.dp))
-            LogItemRow(
-                title = "Whole Grain",
-                subtitle = "2 slices",
-                kcal = "160 kcal",
-                macros = "P: 8g · C: 28g · F: 2g"
-            )
+                foodLog.forEach { food ->
+                    LogItemRow(
+                        title = food.description ?: "Unknown Food",
+                        subtitle = "1 serving",
+                        kcal = "${food.calories?.toInt() ?: 0} kcal",
+                        macros = "P: ${food.protein?.toInt() ?: 0}g · C: ${food.totalCarbs?.toInt() ?: 0}g · F: ${food.totalFat?.toInt() ?: 0}g"
+                    )
+                    Spacer(Modifier.height(12.dp))
+                }
+            } else {
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    text = "No food logged yet today",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextSecondary,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
         }
     }
 }

@@ -16,7 +16,13 @@ import kotlinx.coroutines.launch
 data class DailyGoalsUi(
     val caloriesCurrent: Int,
     val caloriesTarget: Int,
-    val progressToCalorieGoal: Float
+    val progressToCalorieGoal: Float,
+    val proteinCurrent: Int = 0,
+    val proteinTarget: Double = 0.0,
+    val carbsCurrent: Int = 0,
+    val carbsTarget: Int = 0,
+    val fatCurrent: Int = 0,
+    val fatTarget: Int = 0
 )
 
 data class WeeklyDayUi(
@@ -64,6 +70,9 @@ class GoalsViewModel(application: Application) : AndroidViewModel(application) {
     private val goalsRepository: GoalsRepository
     private val settingsRepository: SettingsRepository
 
+    // Store current RDI for real-time updates
+    private var currentRdi: RDIRequirements? = null
+
     private val _uiState = mutableStateOf(
         GoalsUiState(
             daily = DailyGoalsUi(
@@ -91,6 +100,7 @@ class GoalsViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             // 1) Get RDI requirements using the SAME logic as Your RDI screen
             val rdi: RDIRequirements = settingsRepository.getCurrentRdiRequirements()
+            currentRdi = rdi
             val calorieTarget = rdi.calories
 
             // 2) Get last up-to-31 days of REAL logs from DB
@@ -214,6 +224,36 @@ class GoalsViewModel(application: Application) : AndroidViewModel(application) {
             daysMetGoal = daysMet,
             successRatePercent = successRate,
             weeks = weeks
+        )
+    }
+
+    /**
+     * Update daily goals with current food log from today
+     */
+    fun updateFoodLog(foodLog: List<com.example.nutritiontracker.data.fdc.NutritionSummary>) {
+        val rdi = currentRdi ?: return
+
+        // Calculate totals from food log
+        val totalCalories = foodLog.sumOf { it.calories ?: 0.0 }.toInt()
+        val totalProtein = foodLog.sumOf { it.protein ?: 0.0 }.toInt()
+        val totalCarbs = foodLog.sumOf { it.totalCarbs ?: 0.0 }.toInt()
+        val totalFat = foodLog.sumOf { it.totalFat ?: 0.0 }.toInt()
+
+        // Update daily UI with real-time data
+        _uiState.value = _uiState.value.copy(
+            daily = DailyGoalsUi(
+                caloriesCurrent = totalCalories,
+                caloriesTarget = rdi.calories,
+                progressToCalorieGoal = if (rdi.calories > 0) {
+                    totalCalories.toFloat() / rdi.calories
+                } else 0f,
+                proteinCurrent = totalProtein,
+                proteinTarget = rdi.protein,
+                carbsCurrent = totalCarbs,
+                //carbsTarget = rdi.carbs,
+                fatCurrent = totalFat,
+                //fatTarget = rdi.fat
+            )
         )
     }
 }
