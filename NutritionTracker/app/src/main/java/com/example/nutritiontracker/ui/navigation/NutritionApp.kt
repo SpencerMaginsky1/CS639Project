@@ -1,7 +1,7 @@
-// ui/navigation/NutritionApp.kt
 package com.example.nutritiontracker.ui.navigation
 
 import android.util.Log
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -30,6 +30,12 @@ import com.example.nutritiontracker.data.fdc.NutritionResults
 import com.example.nutritiontracker.data.fdc.NutritionSummary
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import androidx.compose.ui.platform.LocalContext
+import com.example.nutritiontracker.data.local.DailyLogEntity
+import com.example.nutritiontracker.data.local.NutritionDatabase
+
+
 
 
 @Composable
@@ -49,6 +55,28 @@ fun NutritionApp(cameraController: CameraController) {   // still passed from Ma
     // List of today's logged food items
     var todaysFoodLog by remember { mutableStateOf<List<NutritionSummary>>(emptyList()) }
 
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val dailyLogDao = remember {
+        NutritionDatabase.getInstance(context).dailyLogDao()
+    }
+
+    fun upsertToday(foodLog: List<NutritionSummary>) {
+        val today = LocalDate.now().toString()
+        val calories = foodLog.sumOf { (it.calories ?: 0).toInt() }
+
+        coroutineScope.launch(Dispatchers.IO) {
+            dailyLogDao.upsertLog(
+                DailyLogEntity(
+                    date = today,
+                    caloriesConsumed = calories,
+                    caloriesTarget = 0
+                )
+            )
+        }
+    }
+
+
+
     cameraController.barcodeScannedReturnHome { barcode ->
         scannedBarcode = barcode
         selectedScreen = Screen.Home
@@ -62,6 +90,7 @@ fun NutritionApp(cameraController: CameraController) {   // still passed from Ma
 
         // Add to today's food log
         todaysFoodLog = todaysFoodLog + summary
+        upsertToday(todaysFoodLog)
 
         Log.i("Manual Entry Success", "Food found: ${summary.description}")
         Log.i(
@@ -108,6 +137,7 @@ fun NutritionApp(cameraController: CameraController) {   // still passed from Ma
 
                 // Add to today's food log
                 todaysFoodLog = todaysFoodLog + results.summary
+                upsertToday(todaysFoodLog)
             } catch (e: Exception) {
                 obtainedErrors = when (e) {
                     is NoSuchElementException -> "Food not Found"
@@ -144,11 +174,11 @@ fun NutritionApp(cameraController: CameraController) {   // still passed from Ma
                 }
             }
         }
-    ) { _ ->
+    ) { paddingValues ->
         when (selectedScreen) {
             Screen.Home -> HomeScreen(
                 onSettingsClick = { selectedScreen = Screen.Settings },
-                modifier = Modifier,
+                modifier = Modifier.padding(paddingValues),
                 cameraController = cameraController,
                 onScanClick = { selectedScreen = Screen.Camera },
                 onBarcodeEntered = processBarcodeCallback,

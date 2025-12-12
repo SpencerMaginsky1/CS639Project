@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.nutritiontracker.camera.CameraController
 import com.example.nutritiontracker.ui.components.HeaderSection
@@ -45,7 +46,7 @@ import com.example.nutritiontracker.ui.theme.TextPrimary
 import com.example.nutritiontracker.ui.theme.TextSecondary
 import com.example.nutritiontracker.R
 import com.example.nutritiontracker.data.fdc.NutritionSummary
-
+import com.example.nutritiontracker.data.RDIRequirements
 
 @Composable
 fun HomeScreen(
@@ -55,6 +56,7 @@ fun HomeScreen(
     onBarcodeEntered: (String) -> Unit,
     onManualEntry: (NutritionSummary) -> Unit,
     onSettingsClick: () -> Unit = {},   // gets callback from NutritionApp
+    rdiRequirements: RDIRequirements? = null,
     foodLog: List<NutritionSummary> = emptyList()
 ) {
     Column(
@@ -72,7 +74,7 @@ fun HomeScreen(
 
         Spacer(Modifier.height(8.dp))
 
-        TodayProgressCard()
+        TodayProgressCard(foodLog, rdiRequirements)
         Spacer(Modifier.height(24.dp))
         AddFoodSection(cameraController, onScanClick)
         Spacer(Modifier.height(24.dp))
@@ -84,7 +86,38 @@ fun HomeScreen(
 }
 
 @Composable
-fun TodayProgressCard() {
+fun TodayProgressCard(foodLog: List<NutritionSummary>, rdiRequirements: RDIRequirements?) {
+
+    // --- totals from today's log ---
+    val totalProtein = foodLog.sumOf { it.protein ?: 0.0 }
+    val totalCarbs = foodLog.sumOf { it.totalCarbs ?: 0.0 }
+    val totalFiber = foodLog.sumOf { it.fiber ?: 0.0 }
+
+    val totalVitaminC = foodLog.sumOf { it.vitaminC ?: 0.0 }
+    val totalVitaminD = foodLog.sumOf { it.vitaminD ?: 0.0 }
+    val totalCalcium = foodLog.sumOf { it.calcium ?: 0.0 }
+    val totalIron = foodLog.sumOf { it.iron ?: 0.0 }
+
+    // --- targets (use same targets as Goals screen; fallback to constants) ---
+    val proteinTarget = rdiRequirements?.protein ?: 40.0
+    val carbsTarget = rdiRequirements?.carbohydrates ?: 130.0
+    val fiberTarget = rdiRequirements?.fiber ?: 25.0
+
+    val vitaminCTarget = (rdiRequirements?.vitaminC?.toDouble() ?: 75.0)
+    val vitaminDTarget = (rdiRequirements?.vitaminD?.toDouble() ?: 15.0)
+    val calciumTarget = (rdiRequirements?.calcium?.toDouble() ?: 1000.0)
+    val ironTarget = (rdiRequirements?.iron ?: 18.0)
+
+    // --- group totals for your 3 bars ---
+    val macrosValue = totalProtein + totalCarbs + totalFiber
+    val macrosTarget = proteinTarget + carbsTarget + fiberTarget
+
+    val vitaminsValue = totalVitaminC + totalVitaminD
+    val vitaminsTarget = vitaminCTarget + vitaminDTarget
+
+    val mineralsValue = totalCalcium + totalIron
+    val mineralsTarget = calciumTarget + ironTarget
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -107,27 +140,27 @@ fun TodayProgressCard() {
 
             NutrientProgressRow(
                 label = "Macro-nutrients",
-                valueText = "120 / 228 g",
-                remainingText = "160 g remaining",
-                progress = 120f / 228f,
+                valueText = "${macrosValue.toInt()} / ${macrosTarget.toInt()} g",
+                remainingText = "${(macrosTarget - macrosValue).coerceAtLeast(0.0).toInt()} g remaining",
+                progress = (macrosValue / macrosTarget).toFloat(),
                 barColor = Color(0xFF4285F4)
             )
             Spacer(modifier = Modifier.height(12.dp))
 
             NutrientProgressRow(
                 label = "Vitamins",
-                valueText = "8200 / 9080 mg",
-                remainingText = "880 mg remaining",
-                progress = 8200f / 9080f,
+                valueText = "${vitaminsValue.toInt()} / ${vitaminsTarget.toInt()} mg",
+                remainingText = "${(vitaminsTarget - vitaminsValue).coerceAtLeast(0.0).toInt()} mg remaining",
+                progress = (vitaminsValue / vitaminsTarget).toFloat(),
                 barColor = Color(0xFFF9A825)
             )
             Spacer(modifier = Modifier.height(12.dp))
 
             NutrientProgressRow(
                 label = "Minerals",
-                valueText = "525 / 608 mg",
-                remainingText = "83 mg remaining",
-                progress = 525f / 608f,
+                valueText = "${mineralsValue.toInt()} / ${mineralsTarget.toInt()} mg",
+                remainingText = "${(mineralsTarget - mineralsValue).coerceAtLeast(0.0).toInt()} mg remaining",
+                progress = (mineralsValue / mineralsTarget).toFloat(),
                 barColor = Color(0xFFE53935)
             )
         }
@@ -513,7 +546,9 @@ fun TodaysLogCard(foodLog: List<NutritionSummary> = emptyList()) {
                         title = food.description ?: "Unknown Food",
                         subtitle = "1 serving",
                         kcal = "${food.calories?.toInt() ?: 0} kcal",
-                        macros = "P: ${food.protein?.toInt() ?: 0}g · C: ${food.totalCarbs?.toInt() ?: 0}g · F: ${food.totalFat?.toInt() ?: 0}g"
+                        macros = "P: ${food.protein?.toInt() ?: 0}g · " +
+                                "C: ${food.totalCarbs?.toInt() ?: 0}g · " +
+                                "F: ${food.totalFat?.toInt() ?: 0}g"
                     )
                     Spacer(Modifier.height(12.dp))
                 }
@@ -530,21 +565,32 @@ fun TodaysLogCard(foodLog: List<NutritionSummary> = emptyList()) {
     }
 }
 
+
 @Composable
 fun LogItemRow(
     title: String,
     subtitle: String,
     kcal: String,
-    macros: String
+    macros: String,
+    onClick: () -> Unit = {}
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column {
+
+        // LEFT: constrained text
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 8.dp)
+        ) {
             Text(
                 text = title,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.bodyMedium,
                 color = TextPrimary
             )
@@ -555,26 +601,31 @@ fun LogItemRow(
             )
         }
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(horizontalAlignment = Alignment.End) {
-                Text(
-                    text = kcal,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = TextPrimary
-                )
-                Text(
-                    text = macros,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = TextSecondary
-                )
-            }
-
-            Spacer(modifier = Modifier.width(8.dp))
-            Icon(
-                imageVector = Icons.Filled.ChevronRight,
-                contentDescription = "Details",
-                tint = TextSecondary
+        // RIGHT: fixed width
+        Column(
+            horizontalAlignment = Alignment.End,
+            modifier = Modifier.width(140.dp)
+        ) {
+            Text(
+                text = kcal,
+                style = MaterialTheme.typography.bodyMedium,
+                color = TextPrimary
+            )
+            Text(
+                text = macros,
+                style = MaterialTheme.typography.bodySmall,
+                color = TextSecondary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Icon(
+            imageVector = Icons.Filled.ChevronRight,
+            contentDescription = "Details",
+            tint = TextSecondary
+        )
     }
 }

@@ -14,6 +14,9 @@ interface DailyLogDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertLogs(logs: List<DailyLogEntity>)
 
+    @Query("SELECT * FROM daily_log WHERE date = :date LIMIT 1")
+    suspend fun getLogByDate(date: String): DailyLogEntity?
+
     @Query("SELECT * FROM daily_log ORDER BY date ASC")
     suspend fun getAllLogs(): List<DailyLogEntity>
 
