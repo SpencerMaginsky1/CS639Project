@@ -15,6 +15,9 @@ Whether you want to eat more balanced meals, improve your energy levels, or bett
 With smart logging tools, daily summaries, and clear progress insights, you always know how your nutrition supports your goals.
 **Your nutrition, simplified.**
 
+## App Build (APK)
+[Download NutritionTracker APK](#)
+
 ## Idea Proposal
 We provided one concept for the app in this proposal.
 [Access the full document](https://docs.google.com/document/d/1ZKc6Qso6i7H1zEfAr3XOron34Bq-oyco2D7qs0zLsSc/edit?usp=sharing)
