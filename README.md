@@ -107,15 +107,15 @@ You can view the full UI/UX design of this app on Figma:
 ## Screenshots
 
 <p align="center">
-  <img src="assets/screenshots/Home.png" width="220" />
-  <img src="assets/screenshots/Scan_barcode.png" width="220" />
-  <img src="assets/screenshots/Daily_goals.png" width="220" />
+  <img src="NutritionTracker/assets/screenshots/Home.png" width="220" />
+  <img src="NutritionTracker/assets/screenshots/Scan_barcode.png" width="220" />
+  <img src="NutritionTracker/assets/screenshots/Daily_goals.png" width="220" />
 </p>
 
 <p align="center">
-  <img src="assets/screenshots/Monthly_goals.png" width="220" />
-  <img src="assets/screenshots/Your_RDI.png" width="220" />
-  <img src="assets/screenshots/Settings.png" width="220" />
+  <img src="NutritionTracker/assets/screenshots/Monthly_goals.png" width="220" />
+  <img src="NutritionTracker/assets/screenshots/Your_RDI.png" width="220" />
+  <img src="NutritionTracker/assets/screenshots/Settings.png" width="220" />
 </p>
 
 
