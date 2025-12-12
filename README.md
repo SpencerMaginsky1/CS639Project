@@ -104,5 +104,14 @@ You can view the full UI/UX design of this app on Figma:
   </tr>
 </table>
 
+## Screenshots
+
+<img src="assets/screenshots/Home.png" width="230" />
+<img src="assets/screenshots/Scan_barcode.png" width="230" />
+<img src="assets/screenshots/Daily_goals.png" width="230" />
+
+<img src="assets/screenshots/Monthly goals.png" width="230" />
+<img src="assets/screenshots/Your_RDI.png" width="230" />
+<img src="assets/screenshots/Settings.png" width="230" />
 
 
