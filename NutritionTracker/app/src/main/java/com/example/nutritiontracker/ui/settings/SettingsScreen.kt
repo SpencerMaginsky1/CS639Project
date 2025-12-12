@@ -99,7 +99,8 @@ fun SettingsScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .padding(bottom = 120.dp),  // Extra padding for navigation bar and dropdowns
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     PersonalInformationSection(
@@ -160,7 +161,8 @@ fun SettingsScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .padding(bottom = 100.dp),  // Extra padding for navigation bar
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     SettingsSummaryView(
