@@ -122,4 +122,12 @@ You can view the full UI/UX design of this app on Figma:
   </tr>
 </table>
 
+## Learning Experience & Challenges
+
+- Strengthened logical thinking through the use of callbacks and asynchronous operations.  
+- Learned to integrate **CameraX with Jetpack Compose** to analyze images and process barcode data using **Google ML Kit**.  
+- Further developed experience with **Retrofit** to build and query the **USDA FoodData Central (FDC) API**.  
+- Improved data management skills by working with **data classes** to handle large and complex datasets.  
+- Overcame system crashes and unexpected behaviors by debugging issues introduced during feature updates and refactoring.  
+
 
