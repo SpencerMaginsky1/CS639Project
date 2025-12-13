@@ -79,14 +79,6 @@ You can view the full UI/UX design of this app on Figma:
   </tr>
 
   <tr>
-    <td><b>Kotlin Kandy (Charts)</b><br>
-      (https://kotlin.github.io/kandy/welcome.html)
-    </td>
-    <td>Chart visualizations</td>
-    <td>Reads data from Room → creates bar charts comparing intake vs. recommended values.</td>
-  </tr>
-
-  <tr>
     <td><b>Retrofit</b></td>
     <td>API communication</td>
     <td>Sends UPC requests to the USDA database and receives structured nutrition data.</td>
