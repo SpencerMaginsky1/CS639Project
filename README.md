@@ -87,20 +87,6 @@ You can view the full UI/UX design of this app on Figma:
   </tr>
 
   <tr>
-    <td><b>WorkManager</b></td>
-    <td>Daily reminders</td>
-    <td>Sends reminders to log meals or check progress even when the app is closed.</td>
-  </tr>
-
-  <tr>
-    <td><b>ODPHP Nutrition Guidelines</b><br>
-      (https://odphp.health.gov/sites/default/files/2019-09/Appendix-E3-1-Table-A4.pdf)
-    </td>
-    <td>Recommended nutrient values</td>
-    <td>Provides official baseline values used to calculate % of each nutrient consumed.</td>
-  </tr>
-
-  <tr>
     <td><b>Retrofit</b></td>
     <td>API communication</td>
     <td>Sends UPC requests to the USDA database and receives structured nutrition data.</td>
