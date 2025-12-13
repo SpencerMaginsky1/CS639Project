@@ -78,6 +78,18 @@ You can view the full UI/UX design of this app on Figma:
     <td>Stores recommended daily goals and user inputs (age, sex, preferences).</td>
   </tr>
 
+<tr>
+  <td>
+    <b>ODPHP Nutrition Guidelines</b><br>
+    (https://odphp.health.gov/sites/default/files/2019-09/Appendix-E3-1-Table-A4.pdf)
+  </td>
+  <td>Recommended nutrient values (RDI/DRI baselines)</td>
+  <td>
+    Provides official daily target values for key nutrients. The app uses these baseline recommendations to
+    calculate each user’s targets and compute <b>% of nutrient consumed</b> compared to the guideline values.
+  </td>
+</tr>
+
   <tr>
     <td><b>Retrofit</b></td>
     <td>API communication</td>
